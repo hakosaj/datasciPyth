@@ -7,14 +7,14 @@ from keras.layers import Convolution2D, MaxPooling2D, Flatten, Dropout, BatchNor
 from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings("ignore")
-
+import time
 
 train =pd.read_csv("train.csv")
 test = pd.read_csv("test.csv")
 
 submission = pd.read_csv("sample_submission.csv")
 
-
+#https://www.kaggle.com/cdeotte/25-million-images-0-99757-mnist
 #Scale the values in 0-1
 X = train.iloc[:,1:]/255.
 y = train.iloc[:,0]
@@ -39,33 +39,42 @@ def standardize(x):
 
 #Model for the CNN
 def CNN():
-    model = models.Sequential()
-    model.add(Lambda(standardize,input_shape=(28,28,1)))
-    model.add(Convolution2D(32,(3,3),activation='relu'))
-    model.add(BatchNormalization(axis=1))
-    model.add(Convolution2D(64,(3,3),activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Convolution2D(128,(3,3),activation='relu'))
-    model.add(BatchNormalization(axis=1))
-    model.add(Convolution2D(128,(2,2),activation='relu'))
-    model.add(MaxPooling2D())
+    model=models.Sequential()
+    model.add(Convolution2D(32, kernel_size = 3, activation='relu', input_shape = (28, 28, 1)))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(32, kernel_size = 3, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(32, kernel_size = 5, strides=2, padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.4))
+
+    model.add(Convolution2D(64, kernel_size = 3, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(64, kernel_size = 3, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(64, kernel_size = 5, strides=2, padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.4))
+
+    model.add(Convolution2D(128, kernel_size = 4, activation='relu'))
+    model.add(BatchNormalization())
     model.add(Flatten())
-    model.add(Dense(256,activation='relu'))
-    model.add(Dropout(0,4))
-    model.add(Dense(256,activation='relu'))
-    model.add(Dropout(0,3))
-    model.add(Dense(10,activation='softmax'))
-    model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+    model.add(Dropout(0.4))
+    model.add(Dense(10, activation='softmax'))
+    model.compile(optimizer='adam', loss='categorical_crossentropy',
+                  metrics=['accuracy'])
     return model
 
 #Fit and boom
 classifier = CNN()
-
+start = time.time()
 classifier.fit(Xtrain,ytrain,epochs=20,batch_size=1000,validation_data=(Xtest,ytest))
+end = time.time()
+print("Elapsed: ",end-start," seconds. \n")
 
 #Predictions
 prediction=classifier.predict(test)
-prefictions=np.argmax(prediction,axis=1)
+predictions=np.argmax(prediction,axis=1)
 
 # submission
 submissions=pd.DataFrame({"ImageId": list(range(1,len(predictions)+1)),"Label": predictions})
