@@ -56,6 +56,7 @@ def CNN():
     model.add(BatchNormalization())
     model.add(Dropout(0.4))
 
+
     model.add(Convolution2D(128, kernel_size = 4, activation='relu'))
     model.add(BatchNormalization())
     model.add(Flatten())
