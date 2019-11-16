@@ -88,7 +88,16 @@ for index, row in rar.iterrows():
         vr=vals2[0]
         tempFeatures.append([vr,vr,vr,0,0,1])
 features=pd.DataFrame.from_records(tempFeatures)
-        
+
+means=[]
+stds=[]
+for (columnName, columnData) in features.iteritems():
+       rara=columnData.values
+       means.append(st.mean(rara.tolist()))
+       stds.append(st.stdev(rara.tolist()))
+data_tuples=list(zip(means,stds))
+stats=pd.DataFrame(data_tuples,columns=["Means","STDS"])
+stats.to_csv("scaler.csv", encoding='utf-8', index=False)
 
 #Splitting the data into train and test sets. Using standard deviation scaler
 #to scale the features into more sensible range.
@@ -128,9 +137,6 @@ print("Confusion matrix:")
 print(confusion_matrix(y_test, y_pred))
 print("\n Classification report")
 print(classification_report(y_test,y_pred))
-
-
-#Get the logreg coefficients and export them as CSV
 coefficients = pd.concat([pd.DataFrame(["Mean","Min","Max","Range","STD","nOfCells"]),pd.DataFrame(np.transpose(lr.coef_))], axis = 1)
 print(coefficients)
 coefficients.to_csv("coefs.csv", encoding='utf-8', index=False)
