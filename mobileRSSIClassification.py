@@ -128,6 +128,9 @@ print("Confusion matrix:")
 print(confusion_matrix(y_test, y_pred))
 print("\n Classification report")
 print(classification_report(y_test,y_pred))
+
+
+#Get the logreg coefficients and export them as CSV
 coefficients = pd.concat([pd.DataFrame(["Mean","Min","Max","Range","STD","nOfCells"]),pd.DataFrame(np.transpose(lr.coef_))], axis = 1)
 print(coefficients)
 coefficients.to_csv("coefs.csv", encoding='utf-8', index=False)
